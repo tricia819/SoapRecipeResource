@@ -1,0 +1,371 @@
+<!-- HTML for Tricia Gray's Soap Recipe Resource -->
+
+<html lang="en" ng-app="soapApp">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Soap Calculator">
+  <meta name="author" content="Tricia Gray">
+  <title>Soap Recipe Resource</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-resource.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="soap.css" />
+  <script type="text/javascript" src="soap.js"></script>
+</head>
+
+<body>
+  <form ng-controller='recipeController as recipe'>
+    <h1>Soap Recipe Resource</h1>
+
+    <!--Recipe Setup Row 1-->
+    <table style="width:100%">
+      <!--Recipe Setup Row 1 Cell 1-->
+      <tr>
+        <td>
+          <div>
+            1 – Are you making liquid or solid soap?<br>
+            <input type="radio" ng-model="recipe.q1" value="naoh"> Solid Soap using NaOH (Sodium Hydroxide)<br>
+            <input type="radio" ng-model="recipe.q1" value="koh"> Liquid Soap using KOH (Potasium Hydroxide)<br>
+          </div>
+        </td>
+        <!--Recipe Setup Row 1 Cell 2-->
+        <td>
+          <div>
+            2 – What unit of measure would you like to use to calculate your recipe?<br>
+            <input type="radio" ng-model="recipe.q2" value="unitPercentage"> Percentages
+            <input type="radio" ng-model="recipe.q2" value="unitWeight">Weight<br><br>
+              Batch Size / Weight of oils:
+              <input type="number" ng-model="recipe.totalWeightOfOils" class="text-line" size="3" /><br>
+              <input type="radio" ng-model="recipe.unitOfMeasure" value="Grams"> Grams
+              <input type="radio" ng-model="recipe.unitOfMeasure" value="Ounces"> Ounces
+              <input type="radio" ng-model="recipe.unitOfMeasure" value="Pounds"> Pounds
+              <input type="radio" ng-model="recipe.unitOfMeasure" value="Kilograms"> Kilograms
+          </div>
+        </td>
+      </tr>
+      <!--Recipe Setup Row 2 Cell 1-->
+      <tr>
+        <td>
+          <div>
+            3 – Amount of water in recipe?<br>
+            <input type="radio" ng-model="recipe.q3" value="waterAsPercentOfOils">
+            <input type="number" ng-model="recipe.waterPercent" size="3"> % - Water as a percent of oils (recommended 33% - 38%)<br>
+            <input type="radio" ng-model="recipe.q3" value="lyeConcentration">
+            <input type="number" ng-model="recipe.lyePercent" size="3"> % - Lye Concentration<br>
+            <input type="radio" ng-model="recipe.q3" value="lyeRatio">
+            <input type="number" ng-model="recipe.waterRatio" size="1"> :
+            <input type="number" ng-model="recipe.lyeRatio" size="1"> Water : Lye ratio<br><br>
+            <input type="number" ng-model="recipe.waterDiscount" size="2"> % Water Discount (Display percentage, don't actually allow entry)
+          </div>
+        </td>
+        <!--Recipe Setup Row 2 Cell 2 Part 1-->
+        <td>
+          <div>
+            4 – Oil Superfat<br>
+            <input type="number" ng-model="recipe.superfatPercent" size="3"> % superfat (recommended 5%)
+          </div>
+          <br><!--Recipe Setup Row 2 Cell 2 Part 2-->
+          <div>
+            5 – Fragrance/Essential Oil<br>
+            <input type="radio" ng-model="recipe.q5" value="fragranceOilPercentage">
+            <input type="number" ng-model="recipe.fragrancePercent" size="3"> % of the oil measurement (recommended 3%)<br>
+            <input type="radio" ng-model="recipe.q5" value="fragranceOilWeight">
+            <input type="number" ng-model="recipe.fragranceWeight" size="3"> grams (weight)
+          </div>
+        </td>
+      </tr>
+    </table>
+    <!--Recipe Setup Row 3 OIL SELECTION-->
+    <table style="width:100%">
+      <!--Recipe Setup Row 3 OIL SELECTION Cell 1-->
+      <tr>
+        <td>
+          <div ng-controller='oilsController as oils' id="oilList">
+            6 – Select an oil to add it to your recipe<br>
+            <input type="text" id="query" ng-model="oils.query" />
+            <ul id="oils_ul">
+              <li ng-repeat="oil in oils.oilsArray | filter:oils.query | orderBy: 'name'">
+                <a ng-click="recipe.selectOil(oil); recipe.showQualities(oil);">
+            {{oil.name}}</a> <br/>
+              </li>
+            </ul>
+          </div>
+        </td>
+        <!--Recipe Setup Row 3 OIL SELECTION Cell 2-->
+        <td>
+          <div ng-show="recipe.selectedOilsArray.length > 0">
+            6b. Recipe Oils<br>
+            <!--Percentage Version -->
+            <span ng-show="recipe.q2 == 'unitPercentage'">
+      <ul>
+        <li ng-repeat="oil in recipe.selectedOilsArray | orderBy: 'name'">
+        {{oil.name}} <input type="number"
+                           ng-model="oil.oilAmount"
+                           ng-change="recipe.getSum();"
+                           placeholder="%"
+                           ng-minlength="1"
+                           ng-maxlength="3"
+                           min="1"
+                           max="100">
+        </li>
+      </ul>
+        Total Percentage: {{recipe.currentTotalOfOils}}<br>
+        Total percentage SHOULD be 100%.
+    </span>
+
+            <!--Weight Version -->
+            <span ng-show="recipe.q2 == 'unitWeight'">
+        <ul>
+          <li ng-repeat="oil in recipe.selectedOilsArray | orderBy: 'name'">
+          {{oil.name}} <input type="number"
+                             ng-model="oil.oilAmount"
+                             ng-change="recipe.getSum();"
+                             ng-focus="recipe.showQualities(oil);"
+                             placeholder="weight">
+          </li>
+        </ul>
+          Total Weight: {{recipe.currentTotalOfOils}}<br>
+          Total Weight should be: {{recipe.totalWeightOfOils}} {{recipe.unitOfMeasure}}
+        </span>
+          </div>
+        </td>
+        <!--Recipe Setup Row 3 OIL SELECTION Cell 3-->
+        <td>
+          <div ng-show="recipe.selectedOilsArray.length > 0" ng-model="recipe.selectedOil">
+            <table>
+              <tr>
+                <th>6c. Oil Properties of {{recipe.selectedOil.name}}</th>
+              </tr>
+              <tr>
+                <td>Iodine</td>
+                <td>{{recipe.selectedOil.iodine}}</td>
+              </tr>
+              <tr>
+                <td>INS</td>
+                <td>{{recipe.selectedOil.ins}}</td>
+              </tr>
+              <tr>
+                <td>Lauric</td>
+                <td>{{recipe.selectedOil.lauric}}</td>
+              </tr>
+              <tr>
+                <td>Linoleic</td>
+                <td>{{recipe.selectedOil.linoleic}}</td>
+              </tr>
+              <tr>
+                <td>Linolenic</td>
+                <td>{{recipe.selectedOil.linolenic}}</td>
+              </tr>
+              <tr>
+                <td>Myristic</td>
+                <td>{{recipe.selectedOil.myristic}}</td>
+              </tr>
+              <tr>
+                <td>Oleic</td>
+                <td>{{recipe.selectedOil.oleic}}</td>
+              </tr>
+              <tr>
+                <td>Palmistic</td>
+                <td>{{recipe.selectedOil.palmistic}}</td>
+              </tr>
+              <tr>
+                <td>Ricinoleic</td>
+                <td>{{recipe.selectedOil.ricinoleic}}</td>
+              </tr>
+              <tr>
+                <td>Stearic</td>
+                <td>{{recipe.selectedOil.stearic}}</td>
+              </tr>
+            </table>
+          </div>
+        </td>
+    </table>
+    <!--View Recipe - Row 1 - Cell 1 - RECIPE-->
+    <div ng-show="recipe.selectedOilsArray.length > 0" ng-model="recipe">
+      <table style="width:100%">
+        <tr>
+          <td>Recipe</td>
+        </tr>
+        <tr>
+          <th>Ingredient</th>
+          <th>%</th>
+          <th>Grams</th>
+          <th>Ounces</th>
+          <th>Pounds</th>
+          <th>Kilograms</th>
+        </tr>
+        <tr>
+          <td>Water</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+        <tr>
+          <td>Lye</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+        <tr>
+          <td>Fragrance</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+
+        <tr ng-repeat="oil in recipe.selectedOilsArray | orderBy: 'name'">
+          <td>{{oil.name}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+
+        <tr>
+          <td>Total Oil Weight</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+        <tr>
+          <td>Total Batch Weight</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+          <td>{{recipe.selectedOil.sapNaOH}}</td>
+        </tr>
+      </table>
+    </div>
+    <!--View Recipe - Row 2-->
+    <table style="width:98%">
+      <!--View Recipe - Row 2 - Cell 1-->
+      <td>
+        <div ng-show="recipe.selectedOilsArray.length > 0" ng-model="recipe.selectedOil">
+          <table>
+            <tr>
+              <th>Supporting Information</th>
+            </tr>
+            <tr>
+              <td>Superfat</td>
+              <td>{{recipe.selectedOil.sapNaOH}}</td>
+            </tr>
+            <tr>
+              <td> Water as % of Oil Weight </td>
+              <td>{{recipe.selectedOil.sapKOH}}</td>
+            </tr>
+            <tr>
+              <td> Water : Lye Ratio </td>
+              <td>{{recipe.selectedOil.hardness}}</td>
+            </tr>
+            <tr>
+              <td> Saturated : Unsaturated Ratio </td>
+              <td>{{recipe.selectedOil.cleansing}}</td>
+            </tr>
+          </table>
+        </div>
+      </td>
+      <!--View Recipe - Row 2 - Cell 2-->
+      <td>
+        <div ng-show="recipe.selectedOilsArray.length > 0" ng-model="recipe.selectedOil">
+          <table>
+            <tr>
+              <td>Recipe Properties</td>
+            </tr>
+            <tr>
+              <th>Property</th>
+              <th>Recommended</th>
+              <th>Your Recipe</th>
+            </tr>
+            <tr>
+              <td>Hardness</td>
+              <td>29 - 54</td>
+              <td>{{recipe.selectedOil.hardness}}</td>
+            </tr>
+            <tr>
+              <td>Cleansing</td>
+              <td>12 - 22</td>
+              <td>{{recipe.selectedOil.cleansing}}</td>
+            </tr>
+            <tr>
+              <td>Conditioning</td>
+              <td>44 - 69</td>
+              <td>{{recipe.selectedOil.condition}}</td>
+            </tr>
+            <tr>
+              <td>Bubbly</td>
+              <td>14 - 46</td>
+              <td>{{recipe.selectedOil.bubbly}}</td>
+            </tr>
+            <tr>
+              <td>Creamy</td>
+              <td>?? - ??</td>
+              <td>{{recipe.selectedOil.creamy}}</td>
+            </tr>
+            <tr>
+              <td>Iodine</td>
+              <td>41 - 70</td>
+              <td>{{recipe.selectedOil.iodine}}</td>
+            </tr>
+            <tr>
+              <td>INS</td>
+              <td>136 - 165</td>
+              <td>{{recipe.selectedOil.ins}}</td>
+            </tr>
+          </table>
+        </div>
+      </td>
+      <!--View Recipe - Row 2 - Cell 3-->
+      <td>
+        <div ng-show="recipe.selectedOilsArray.length > 0" ng-model="recipe.selectedOil">
+          <table>
+            <tr>
+              <th>Fatty Acids %</th>
+            </tr>
+
+            <tr>
+              <td>Lauric</td>
+              <td>{{recipe.selectedOil.lauric}}</td>
+            </tr>
+            <tr>
+              <td>Linoleic</td>
+              <td>{{recipe.selectedOil.linoleic}}</td>
+            </tr>
+            <tr>
+              <td>Linolenic</td>
+              <td>{{recipe.selectedOil.linolenic}}</td>
+            </tr>
+            <tr>
+              <td>Myristic</td>
+              <td>{{recipe.selectedOil.myristic}}</td>
+            </tr>
+            <tr>
+              <td>Oleic</td>
+              <td>{{recipe.selectedOil.oleic}}</td>
+            </tr>
+            <tr>
+              <td>Palmistic</td>
+              <td>{{recipe.selectedOil.palmistic}}</td>
+            </tr>
+            <tr>
+              <td>Ricinoleic</td>
+              <td>{{recipe.selectedOil.ricinoleic}}</td>
+            </tr>
+            <tr>
+              <td>Stearic</td>
+              <td>{{recipe.selectedOil.stearic}}</td>
+            </tr>
+          </table>
+        </div>
+      </td>
+  </form>
+</body>
