@@ -5,8 +5,8 @@
 
   app.controller('recipeController', function($scope){
     this.q1 = "naoh";
-    this.q2 = "unitPercentage";
-    this.totalWeightOfOils = 32;
+    this.q2 = "unitWeight";
+    this.displayedWeightOfOils = 32;
     this.unitOfMeasure = "Ounces";
     this.q3 = "waterAsPercentOfOils";
     this.waterPercent = 38;
@@ -20,12 +20,19 @@
     this.fragranceWeight = 30;
     this.selectedOil = null;
 
+
     this.selectedOilsArray = [];
     this.selectOil = function(clickedOil) {
       if (!this.selectedOilsArray.includes(clickedOil)){
-      this.selectedOilsArray.push(clickedOil);
+            //clickedOil.oilAmount = 0;
+            this.selectedOilsArray.push(clickedOil);
       }
     };
+
+    this.removeOil = function(removedOil){
+      var index = this.selectedOilsArray.indexOf(removedOil);
+      this.selectedOilsArray.splice(index, 1);
+  };
 
     this.showQualities = function(clickedOil) {
       this.selectedOil = clickedOil
@@ -33,9 +40,33 @@
 
      this.currentTotalOfOils = 0;
      this.getSum = function (){
-       this.currentTotalOfOils = this.selectedOilsArray.reduce(
-        ( accumulator, current ) => accumulator + current.oilAmount,
-        0);
+       this.currentTotalOfOils = this.selectedOilsArray.reduce(function(sum, oil) {
+          if (oil.oilAmount == undefined) {
+            return sum;
+          }
+          else {
+            return sum + oil.oilAmount;
+          };
+        }, 0);
+        this.weightOfOilsInOunces = this.convertToOunces(this.currentTotalOfOils);
+//        this.selectedOil.oilAmountInOunces = this.convertToOunces(this.selectedOil.oilAmount);
+      };
+
+      this.convertToOunces = function(from) {
+          var to = 0;
+          if (this.unitOfMeasure == "Grams"){
+            to = from / 28.3495;
+          }
+          if (this.unitOfMeasure == "Ounces"){
+            to = from;
+          }
+          if (this.unitOfMeasure == "Pounds"){
+            to = from * 16;
+          }
+          if (this.unitOfMeasure == "Kilograms"){
+            to = from * 35.274;
+          }
+        return to;
       };
   });
 
