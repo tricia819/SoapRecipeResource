@@ -48,11 +48,11 @@
         <td>
           <div>
             3 – Amount of water in recipe?<br>
-            <input type="radio" ng-model="recipe.q3" value="waterAsPercentOfOils">
+            <input type="radio" ng-model="recipe.q3" value="waterAsPercentOfOils" ng-change="recipe.calculateRecipe();">
             <input type="number" ng-model="recipe.waterPercent" size="3"> % - Water as a percent of oils (recommended 33% - 38%)<br>
-            <input type="radio" ng-model="recipe.q3" value="lyeConcentration">
-            <input type="number" ng-model="recipe.lyePercent" size="3"> % - Lye Concentration<br>
-            <input type="radio" ng-model="recipe.q3" value="lyeRatio">
+            <input type="radio" ng-model="recipe.q3" value="lyeConcentration" ng-change="recipe.calculateRecipe();">
+            <input type="number" ng-model="recipe.lyeConcentrationPercent" size="3"> % - Lye Concentration<br>
+            <input type="radio" ng-model="recipe.q3" value="lyeRatio" ng-change="recipe.calculateRecipe();">
             <input type="number" ng-model="recipe.waterRatio" size="1"> :
             <input type="number" ng-model="recipe.lyeRatio" size="1"> Water : Lye ratio<br><br>
             <input type="number" ng-model="recipe.waterDiscount" size="2"> % Water Discount (Display percentage, don't actually allow entry)
@@ -62,15 +62,15 @@
         <td>
           <div>
             4 – Oil Superfat<br>
-            <input type="number" ng-model="recipe.superfatPercent" size="3"> % superfat (recommended 5%)
+            <input type="number" ng-model="recipe.superfatPercent" size="3" ng-change="recipe.calculateRecipe();"> % superfat (recommended 5%)
           </div>
           <br><!--Recipe Setup Row 2 Cell 2 Part 2-->
           <div>
             5 – Fragrance/Essential Oil<br>
-            <input type="radio" ng-model="recipe.q5" value="fragranceOilPercentage">
+            <input type="radio" ng-model="recipe.q5" value="fragranceOilPercentage" ng-change="recipe.calculateRecipe();">
             <input type="number" ng-model="recipe.fragrancePercent" size="3"> % of the oil measurement (recommended 3%)<br>
-            <input type="radio" ng-model="recipe.q5" value="fragranceOilWeight">
-            <input type="number" ng-model="recipe.fragranceWeight" size="3"> grams (weight)
+            <input type="radio" ng-model="recipe.q5" value="fragranceOilWeight" ng-change="recipe.calculateRecipe();">
+            <input type="number" ng-model="recipe.fragranceOuncesPerPound" size="3"> ounces per pound of oils
           </div>
         </td>
       </tr>
@@ -200,10 +200,10 @@
         <tr>
           <td>Water</td>
           <td>{{recipe.selectedOil.sapNaOH}}</td>
-          <td>{{recipe.selectedOil.sapNaOH * 28.3495 | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH / 16 | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH / 35.27 | number:2}}</td>
+          <td>{{recipe.waterInOunces * 28.3495 | number:2}}</td>
+          <td>{{recipe.waterInOunces | number:2}}</td>
+          <td>{{recipe.waterInOunces / 16 | number:2}}</td>
+          <td>{{recipe.waterInOunces / 35.27 | number:2}}</td>
         </tr>
         <tr>
           <td>Lye</td>
@@ -216,10 +216,10 @@
         <tr>
           <td>Fragrance</td>
           <td>{{recipe.selectedOil.sapNaOH}}</td>
-          <td>{{(recipe.fragrancePercent/100)*(recipe.convertToOunces(recipe.currentTotalOfOils) * 28.3495) | number:2}}</td>
-          <td>{{(recipe.fragrancePercent/100)*recipe.convertToOunces(recipe.currentTotalOfOils) | number:2}}</td>
-          <td>{{(recipe.fragrancePercent/100)*(recipe.convertToOunces(recipe.currentTotalOfOils) / 16) | number:4}}</td>
-          <td>{{(recipe.fragrancePercent/100)*(recipe.convertToOunces(recipe.currentTotalOfOils) / 35.27) | number:4}}</td>
+          <td>{{recipe.fragranceWeightInOuncesInOunces * 28.3495 | number:2}}</td>
+          <td>{{recipe.fragranceWeightInOunces | number:2}}</td>
+          <td>{{recipe.fragranceWeightInOunces / 16 | number:4}}</td>
+          <td>{{recipe.fragranceWeightInOunces / 35.27 | number:4}}</td>
         </tr>
 
         <tr ng-repeat="oil in recipe.selectedOilsArray | orderBy: 'name'">
@@ -242,10 +242,10 @@
         <tr>
           <td>Total Batch Weight</td>
           <td>{{recipe.selectedOil.sapNaOH}}</td>
-          <td>{{recipe.selectedOil.sapNaOH * 28.3495 | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH / 16 | number:2}}</td>
-          <td>{{recipe.selectedOil.sapNaOH / 35.27 | number:2}}</td>
+          <td>{{recipe.totalBatchWeight * 28.3495 | number:2}}</td>
+          <td>{{recipe.totalBatchWeight | number:2}}</td>
+          <td>{{recipe.totalBatchWeight / 16 | number:2}}</td>
+          <td>{{recipe.totalBatchWeight / 35.27 | number:2}}</td>
         </tr>
       </table>
     </div>

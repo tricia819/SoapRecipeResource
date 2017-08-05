@@ -3,6 +3,7 @@
 (function() {
   var app = angular.module('soapApp', []);
 
+//Initiating variables
   app.controller('recipeController', function($scope) {
     this.q1 = "naoh";
     this.q2 = "unitWeight";
@@ -10,20 +11,24 @@
     this.unitOfMeasure = "Ounces";
     this.q3 = "waterAsPercentOfOils";
     this.waterPercent = 38;
-    this.lyePercent = 30;
+    this.lyeConcentrationPercent = 30;
     this.waterRatio = 3;
     this.lyeRatio = 1;
     this.waterDiscount = 0;
     this.superfatPercent = 5;
     this.q5 = "fragranceOilPercentage";
     this.fragrancePercent = 3;
-    this.fragranceWeight = 30;
+    this.fragranceOuncesPerPound = .5;
+    this.fragranceWeightInOuncesInOunces = 0;
     this.selectedOil = null;
     this.currentTotalOfOils = 0;
     this.lyeAmountInOunces = 0;
     this.weightOfOilsInOunces = 0;
+    this.lyeWaterInOunces = 0;
+    this.waterInOunces = 0;
+    this.totalBatchWeight = 0;
 
-
+//Selecting, displaying and removing oils from recipe
     this.selectedOilsArray = [];
     this.selectOil = function(clickedOil) {
       if (!this.selectedOilsArray.includes(clickedOil)) {
@@ -41,8 +46,10 @@
       this.selectedOil = clickedOil
     };
 
+//Recipe Calculator
     this.calculateRecipe = function() {
 
+//Oil Calculations
       this.currentTotalOfOils = this.selectedOilsArray.reduce(function(sum, oil) {
         if (oil.oilAmount == undefined) {
           return sum;
@@ -51,7 +58,9 @@
         };
       }, 0);
       this.weightOfOilsInOunces = this.convertToOunces(this.currentTotalOfOils);
+      var oilWeightAfterSuperfatRemoval = this.weightOfOilsInOunces * (1 - (this.superfatPercent / 100));
 
+//Lye Calculations
       var recipe = this;
       var lyeAmount = this.selectedOilsArray.reduce(function(sum, oil) {
         if (oil.oilAmount == undefined) {
@@ -59,16 +68,45 @@
         }
         else {
           if (recipe.q1 == "naoh") {
-            return sum + (oil.oilAmount * oil.sapNaOH);
+            return sum + (oil.oilAmount * (1 - (recipe.superfatPercent / 100)) * oil.sapNaOH);
           }
           else {
-            return sum + (oil.oilAmount * oil.sapKOH);
+            return sum + (oil.oilAmount* (1 - (recipe.superfatPercent / 100)) * oil.sapKOH);
           }
         }
       }, 0);
       this.lyeAmountInOunces = this.convertToOunces(lyeAmount);
+
+//Water Calculations
+      if (recipe.q3 == "waterAsPercentOfOils"){
+        this.waterInOunces = this.weightOfOilsInOunces * (this.waterPercent  / 100);
+      }
+
+      else if (recipe.q3 == "lyeConcentration"){
+        this.lyeWaterInOunces = this.lyeAmountInOunces / (this.lyeConcentrationPercent / 100);
+        this.waterInOunces = this.lyeWaterInOunces - this.lyeAmountInOunces;
+      }
+
+      else {
+        this.waterInOunces = (this.waterRatio / this.lyeRatio) * this.lyeAmountInOunces;
+      }
+
+//Fragrance Oil Calculations
+      if (recipe.q5 == "fragranceOilPercentage"){
+        this.fragranceWeightInOunces = this.fragrancePercent;
+      }
+
+      else {
+        this.fragranceWeightInOunces = ((this.weightOfOilsInOunces / 16) * this.fragranceOuncesPerPound);
+      }
+
+//Total Batch Weight Calculations
+    this.totalBatchWeight = this.weightOfOilsInOunces + this.lyeAmountInOunces + this.waterInOunces + this.fragranceWeightInOunces
+
+
     };
 
+//Converting all weights to ounces
     this.convertToOunces = function(from) {
       var to = 0;
       if (this.unitOfMeasure == "Grams") {
@@ -87,6 +125,7 @@
     };
   });
 
+//Oil data (mini-database for testing purposes)
   app.controller('oilsController', function() {
     this.oilsArray = [{
         name: 'Coconut Oil',
