@@ -94,7 +94,17 @@ div {
   border: 3px solid #883f8c;
 }
 
+th {
+  text-align: center;
+}
+
+.oils {
+  border-bottom:1px solid black;
+  border-top:1px solid black;​
+}
+
 #recipe {
+  text-align: right;
   width: 90%;
   margin: auto;
   padding: 15px 15px 15px 15px;

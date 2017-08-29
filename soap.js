@@ -49,80 +49,84 @@
 //Recipe Calculator
     this.calculateRecipe = function() {
 
+        if (this.q2 == "unitPercentage"){
+          //REMOVE THE "SHOULD BE 100 % ERROR"
+        }
+  
 //Oil Calculations
-      this.currentTotalOfOils = this.selectedOilsArray.reduce(function(sum, oil) {
-        if (oil.oilAmount == undefined) {
-          return sum;
-        } else {
-          return sum + oil.oilAmount;
-        };
-      }, 0);
-      this.weightOfOilsInOunces = this.convertToOunces(this.currentTotalOfOils);
-      var oilWeightAfterSuperfatRemoval = this.weightOfOilsInOunces * (1 - (this.superfatPercent / 100));
+        this.currentTotalOfOils = this.selectedOilsArray.reduce(function(sum, oil) {
+          if (oil.oilAmount == undefined) {
+            return sum;
+          } else {
+            return sum + oil.oilAmount;
+          };
+        }, 0);
+        this.weightOfOilsInOunces = this.convertToOunces(this.currentTotalOfOils);
+        var oilWeightAfterSuperfatRemoval = this.weightOfOilsInOunces * (1 - (this.superfatPercent / 100));
 
 //Lye Calculations
-      var recipe = this;
-      var lyeAmount = this.selectedOilsArray.reduce(function(sum, oil) {
-        if (oil.oilAmount == undefined) {
-          return sum;
-        }
-        else {
-          if (recipe.q1 == "naoh") {
-            return sum + (oil.oilAmount * (1 - (recipe.superfatPercent / 100)) * oil.sapNaOH);
+        var recipe = this;
+        var lyeAmount = this.selectedOilsArray.reduce(function(sum, oil) {
+          if (oil.oilAmount == undefined) {
+            return sum;
           }
           else {
-            return sum + (oil.oilAmount* (1 - (recipe.superfatPercent / 100)) * oil.sapKOH);
+            if (recipe.q1 == "naoh") {
+              return sum + (oil.oilAmount * (1 - (recipe.superfatPercent / 100)) * oil.sapNaOH);
+            }
+            else {
+              return sum + (oil.oilAmount* (1 - (recipe.superfatPercent / 100)) * oil.sapKOH);
+            }
           }
-        }
-      }, 0);
-      this.lyeAmountInOunces = this.convertToOunces(lyeAmount);
+        }, 0);
+        this.lyeAmountInOunces = this.convertToOunces(lyeAmount);
 
 //Water Calculations
-      if (recipe.q3 == "waterAsPercentOfOils"){
-        this.waterInOunces = this.weightOfOilsInOunces * (this.waterPercent  / 100);
-      }
+        if (recipe.q3 == "waterAsPercentOfOils"){
+          this.waterInOunces = this.weightOfOilsInOunces * (this.waterPercent  / 100);
+        }
 
-      else if (recipe.q3 == "lyeConcentration"){
-        this.lyeWaterInOunces = this.lyeAmountInOunces / (this.lyeConcentrationPercent / 100);
-        this.waterInOunces = this.lyeWaterInOunces - this.lyeAmountInOunces;
-      }
+        else if (recipe.q3 == "lyeConcentration"){
+          this.lyeWaterInOunces = this.lyeAmountInOunces / (this.lyeConcentrationPercent / 100);
+          this.waterInOunces = this.lyeWaterInOunces - this.lyeAmountInOunces;
+        }
 
-      else {
-        this.waterInOunces = (this.waterRatio / this.lyeRatio) * this.lyeAmountInOunces;
-      }
+        else {
+          this.waterInOunces = (this.waterRatio / this.lyeRatio) * this.lyeAmountInOunces;
+        }
 
 //Fragrance Oil Calculations
-      if (recipe.q5 == "fragranceOilPercentage"){
-        this.fragranceWeightInOunces = this.fragrancePercent;
-      }
+        if (recipe.q5 == "fragranceOilPercentage"){
+          this.fragranceWeightInOunces = this.fragrancePercent;
+        }
 
-      else {
-        this.fragranceWeightInOunces = ((this.weightOfOilsInOunces / 16) * this.fragranceOuncesPerPound);
-      }
+        else {
+          this.fragranceWeightInOunces = ((this.weightOfOilsInOunces / 16) * this.fragranceOuncesPerPound);
+        }
 
 //Total Batch Weight Calculations
-    this.totalBatchWeight = this.weightOfOilsInOunces + this.lyeAmountInOunces + this.waterInOunces + this.fragranceWeightInOunces
-
+      this.totalBatchWeight = this.weightOfOilsInOunces + this.lyeAmountInOunces + this.waterInOunces + this.fragranceWeightInOunces
 
     };
+
 
 //Converting all weights to ounces
-    this.convertToOunces = function(from) {
-      var to = 0;
-      if (this.unitOfMeasure == "Grams") {
-        to = from / 28.3495;
-      }
-      if (this.unitOfMeasure == "Ounces") {
-        to = from;
-      }
-      if (this.unitOfMeasure == "Pounds") {
-        to = from * 16;
-      }
-      if (this.unitOfMeasure == "Kilograms") {
-        to = from * 35.274;
-      }
-      return to;
-    };
+      this.convertToOunces = function(from) {
+        var to = 0;
+        if (this.unitOfMeasure == "Grams") {
+          to = from / 28.3495;
+        }
+        if (this.unitOfMeasure == "Ounces") {
+          to = from;
+        }
+        if (this.unitOfMeasure == "Pounds") {
+          to = from * 16;
+        }
+        if (this.unitOfMeasure == "Kilograms") {
+          to = from * 35.274;
+        }
+        return to;
+      };
   });
 
 //Oil data (mini-database for testing purposes)
