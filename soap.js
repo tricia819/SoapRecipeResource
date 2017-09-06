@@ -3,8 +3,31 @@
 (function() {
   var app = angular.module('soapApp', []);
 
+// Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyB5Yz4e3ec6FZzJIvhK9vU2l-cMg31yd38",
+    authDomain: "soap-recipe-resource.firebaseapp.com",
+    databaseURL: "https://soap-recipe-resource.firebaseio.com",
+    projectId: "soap-recipe-resource",
+    storageBucket: "",
+    messagingSenderId: "113740003193"
+  };
+  firebase.initializeApp(config);
+  console.log(firebase);
+  var database = firebase.database();
+
+
 //Initiating variables
   app.controller('recipeController', function($scope) {
+    this.database = firebase.database();
+    this.ref = database.ref('users');
+
+    this.userData = {
+      username: "Tricia",
+      password: "abcd1234"
+    }
+    this.ref.push(this.userData);
+
     this.q1 = "naoh";
     this.q2 = "unitWeight";
     this.displayedWeightOfOils = 32;
@@ -52,7 +75,7 @@
         if (this.q2 == "unitPercentage"){
           //REMOVE THE "SHOULD BE 100 % ERROR"
         }
-  
+
 //Oil Calculations
         this.currentTotalOfOils = this.selectedOilsArray.reduce(function(sum, oil) {
           if (oil.oilAmount == undefined) {
